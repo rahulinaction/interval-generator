@@ -1,46 +1,23 @@
-# Getting Started with Create React App
+This is a sample project which includes a solution and improvements to the existing solution provided in the PDF
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+To run this project please do an npm install for one time followed by npm start everytime you run the project
 
-## Available Scripts
+The file IntervalHolder.tsx contains the updated changes as compared to the pdf provided . Following are the changes which have been accomodated and solution
 
-In the project directory, you can run:
+1) The code initially breaks because there is no access to this context inside the handlers. The changes which have been done to accomodate it is by using arrow functions for the functions which solves the issue. Have provided the alternate approach of binding the event handlers in the constructor which is commented
 
-### `npm start`
+Changes which  been done to the existing solution in terms of optimisations and best practices
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+1) Defining the state interface called StopwatchState. StopwatchState contains laps which is added in the state instead of  being a class variable.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+2) clearInterval in handleStopClick has a condition check before performing clearInterval. Similar change is done in handleResetClick
 
-### `npm test`
+3)handleLabClick handles the creation of laps based on clicks. Spread operator is used to add new elements to laps .
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+4) In order to handle the lap deletion in handleDeleteClick we use slice for generating portions of 2 array which is merged. 
 
-### `npm run build`
+5) componentWillUnmount is added which contains the cleanup function for interval timer before component is destroyed from the screen
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+6) The return type for handleDeleteClick is changed to accomodate the new change in deletion 
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+Another implementation I would consider is using React hooks. Primarily overthere I would try to have a similar pattern with handlers being added the usecallback hook and I would have a reference of the incrementer in a reference using useRef hook.

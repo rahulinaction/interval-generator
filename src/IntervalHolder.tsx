@@ -1,7 +1,6 @@
 
 import * as React from "react";
-import * as ReactDOM from "react-dom";
-import { Component, ClassAttributes, memo } from "react";
+import { Component, ClassAttributes } from "react";
 
 const formattedSeconds = (sec: number) =>
 Math.floor(sec / 60) + ':' + ('0' + sec % 60).slice(-2);
@@ -10,54 +9,88 @@ interface StopwatchProps extends ClassAttributes<Stopwatch> {
   initialSeconds: number;
 }
 
+//Type used for setInterval
+type IntervalType = ReturnType<typeof setInterval> | null| number | undefined;
 
-class Stopwatch extends Component<StopwatchProps, any> {
-  incrementer: any
-  laps: any[]
+interface StopwatchState {
+  secondsElapsed: number,
+  lastClearedIncrementer:  IntervalType ,
+  laps: number[]
+}
+
+class Stopwatch extends Component<StopwatchProps, StopwatchState> {
+  incrementer: IntervalType
 
   constructor(props: StopwatchProps) {
     super(props);
     this.state = {
       secondsElapsed: props.initialSeconds,
       lastClearedIncrementer: null,
+      laps: []
     }
-    this.laps = []
+    //This was added in comments alternatively as an option compared to arrow functions implemented
+   /* this.handleStartClick = this.handleStartClick.bind(this);
+    this.handleStopClick = this.handleStopClick.bind(this);
+    this.handleResetClick = this.handleResetClick.bind(this);
+    this.handleDeleteClick = this.handleDeleteClick.bind(this);*/
+    /** */
   }
 
-  handleStartClick()  {
+  handleStartClick = () => {
     this.incrementer = setInterval(() =>
     this.setState({
-    secondsElapsed: this.state.secondsElapsed + 1,
+      secondsElapsed: this.state.secondsElapsed + 1,
     }), 1000);
   }
 
-  handleStopClick(){
-    clearInterval(this.incrementer); 
+  handleStopClick = () => {
+    if(this.incrementer) {
+      clearInterval(this.incrementer);
+    }
     this.setState({
-      lastClearedIncrementer: this.incrementer, 
+      lastClearedIncrementer: this.incrementer,
     });
   }
 
-  handleResetClick() { 
-    clearInterval(this.incrementer); 
-    this.laps = [];
+  handleResetClick = () => {
+    if(this.incrementer) {
+      clearInterval(this.incrementer);
+    }
+
     this.setState({
-      secondsElapsed: 0 
+      secondsElapsed: 0,
+      laps: []
     });
   }
 
-  handleLabClick(){
-    this.laps = this.laps.concat([this.state.secondsElapsed]); 
-    this.forceUpdate();
+  handleLabClick = () => {
+    const newLaps = [...this.state.laps, this.state.secondsElapsed];
+    this.setState({
+      laps: newLaps
+    });
   }
 
-  handleDeleteClick(index: number) { 
-    return () => this.laps.splice(index, 1);
+  handleDeleteClick = (index: number) => {
+    const newLaps = [
+      ...this.state.laps.slice(0, index),
+      ...this.state.laps.slice(index + 1)
+    ];
+    return () => this.setState({
+      laps: newLaps
+    });
+  }
+
+  //We need to clear any uncleared timer intervals as component is destroyed
+  componentWillUnmount() {
+    if(this.incrementer) {
+      clearInterval(this.incrementer);
+    }
   }
 
   render() {
     const {
     secondsElapsed,
+    laps,
     lastClearedIncrementer,
     } = this.state;
 
@@ -79,7 +112,7 @@ class Stopwatch extends Component<StopwatchProps, any> {
         : null
         )}
         <div className="stopwatch-laps">
-        { this.laps && this.laps.map((lap, i) =>
+        { laps && laps.map((lap, i) =>
         <Lap key={i} index={i+1} lap={lap} onDelete={this.handleDeleteClick(i)} />) }
         </div>
       </div>
@@ -88,7 +121,7 @@ class Stopwatch extends Component<StopwatchProps, any> {
 
 }
 
-const Lap = (props: { index: number, lap: number, onDelete: () => {} }) => (
+const Lap = (props: { index: number, lap: number, onDelete: ()=>void }) => (
 <div key={props.index} className="stopwatch-lap">
 <strong>{props.index}</strong>/ {formattedSeconds(props.lap)} <button
 onClick={props.onDelete} > X </button>
